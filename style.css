@@ -1,0 +1,37 @@
+#tetris-game {
+	height: 640px;
+	width: 480px;
+	border: 1px solid black;
+	margin: 20px auto;
+}
+
+.tetris-row {
+	font-size: 0px;
+	text-align: center;
+}
+.tetris-cell {
+	display: inline-block;
+	background-color: black;
+}
+
+.tetris-cell.tetris-I {
+	background-color: red;
+}
+.tetris-cell.tetris-J {
+	background-color: blue;
+}
+.tetris-cell.tetris-S {
+	background-color: yellow;
+}
+.tetris-cell.tetris-Z {
+	background-color: green;
+}
+.tetris-cell.tetris-L {
+	background-color: orange;
+}
+.tetris-cell.tetris-O {
+	background-color: purple;
+}
+.tetris-cell.tetris-T {
+	background-color: teal;
+}
