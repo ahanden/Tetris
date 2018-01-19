@@ -34,9 +34,14 @@ function TetrisGame(container, options={}) {
 	this.reset();
 
 	var tg = this;
-	setInterval(function() {
+	this.game = setInterval(function() {
 		tg.next_frame();
 	}, 1000);
+
+  container.onkeypress = function(e){
+    e = e || window.event;
+    tg.keypress(e);
+  }
 }
 
 TetrisGame.prototype.reset = function() {
@@ -54,43 +59,98 @@ TetrisGame.prototype.get_piece = function() {
 	var tg = this;
 	var keys = Object.keys(this.pieces);
 	var type = keys[keys.length * Math.random() << 0];
-	console.log(type);
 	return {
-		x     : 5,
-		y     : 0,
-		type  : type,
-		shape : tg.pieces[type],
-		tg    : tg,
-		move  : function() {
-			var piece = this;
-			var tg    = this.tg;
+		x         : 5,
+		y         : 1,
+		type      : type,
+		shape     : tg.pieces[type],
+		tg        : tg,
+    is_moving : false,
+    rotate    : function() {
+      while(this.is_moving){}
+
+      this.is_moving = true;
+
+      var piece = this;
+      var tg    = this.tg;
 
 			this.shape.forEach(function(e) {
-				var x = piece.x + e[0],
-				    y = piece.y + e[1];
+				var x = piece.x + e[1],
+				    y = piece.y + e[0];
 				tg.grid[y][x].className = "tetris-cell";
 			});
-			
-			var move = 1;
-			for(var i = 0; i < this.shape.length; i++) {
-				var x = this.x + this.shape[i][1],
-				    y = this.y + this.shape[i][0] + 1;
-				if(tg.grid[y][x].className != "tetris-cell" ||
-						y >= tg.grid.length) {
-					move = 0;
-					break;
-				}
-			}
 
-			this.y += move;
+      var new_shape = [];
+      var legal = true;
+      for(var i = 0; i < this.shape.length; i++) {
+        var x = -this.shape[i][0] + this.x,
+            y =  this.shape[i][1] + this.y;
+        if(x < 0 || x >= 12 || y < 0 || y >= tg.grid.length ||
+            tg.grid[y][x].className != "tetris-cell") {
+          console.log("CHECK");
+          legal = false;
+          break;
+        }
+        new_shape.push([this.shape[i][1], -this.shape[i][0]]);
+      }
+
+      if(legal)
+        this.shape = new_shape;
 
 			this.shape.forEach(function(e) {
-				var x = piece.x + e[0],
-				    y = piece.y + e[1];
+				var x = piece.x + e[1],
+				    y = piece.y + e[0];
 				tg.grid[y][x].className = "tetris-cell tetris-" + piece.type;
 			});
 
-			return move > 0;
+      this.is_moving = false;
+    },
+		move      : function(axis="y", distance=1) {
+			var piece = this;
+			var tg    = this.tg;
+
+      while(this.is_moving){}
+
+      is_moving = true;
+
+			this.shape.forEach(function(e) {
+				var x = piece.x + e[1],
+				    y = piece.y + e[0];
+				tg.grid[y][x].className = "tetris-cell";
+			});
+			
+			for(var i = 0; i < this.shape.length; i++) {
+				var x = this.x + this.shape[i][1],
+				    y = this.y + this.shape[i][0];
+        if(axis == "x")
+          x += distance;
+        else if(axis == "y")
+          y += distance;
+
+        if(x < 0 ||
+            x >= 12 ||
+            y < 0 ||
+            y >= tg.grid.length ||
+            tg.grid[y][x].className != "tetris-cell") {
+          distance = 0;
+          break;
+        }
+			}
+
+      if(axis == "x")
+        this.x += distance;
+      else if(axis == "y")
+        this.y += distance;
+
+			this.shape.forEach(function(e) {
+				var x = piece.x + e[1],
+				    y = piece.y + e[0];
+				tg.grid[y][x].className = "tetris-cell tetris-" + piece.type;
+			});
+
+      is_moving = false;
+
+			return distance;
 
 		}
 	};
@@ -101,4 +161,34 @@ TetrisGame.prototype.next_frame = function() {
 		this.piece = this.ondeck;
 		this.ondeck = this.get_piece();
 	}
+}
+
+TetrisGame.prototype.keypress = function(e) {
+  var axis, distance;
+  if(e.keyCode == 37) {
+    axis = "x";
+    distance = -1;
+  }
+  else if(e.keyCode == 39) {
+    axis = "x";
+    distance = 1;
+  }
+  else if(e.keyCode == 40) {
+    axis = "y";
+    distance = 1;
+  }
+  else if(e.keyCode == 38) {
+    this.piece.rotate();
+  }
+	if(typeof axis != "undefined" &&
+      typeof distance != "undefined") {
+    move = this.piece.move(axis, distance);
+    if(axis == "y" && ! move) {
+      this.piece  = this.ondeck;
+      this.ondeck = this.get_piece();
+    }
+  }
+}
+
+TetrisGame.prototype.score = function() {
 }

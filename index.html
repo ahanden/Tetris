@@ -7,7 +7,7 @@
   <link href="style.css" rel="stylesheet" type="text/css" />
   <script type="text/javascript" src="tetris.js"></script>
 </head>
-<body onload="new TetrisGame(document.getElementById('tetris-game'));">
-	<div id="tetris-game"></div>
+<body onload="new TetrisGame(document.getElementById('tetris-game')); document.getElementById('tetris-game').focus(); ">
+	<div id="tetris-game" tabindex="0"></div>
 </body>
 </html>
