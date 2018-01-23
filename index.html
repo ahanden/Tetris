@@ -6,8 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="style.css" rel="stylesheet" type="text/css" />
   <script type="text/javascript" src="tetris.js"></script>
+  <script>
+function start_game() {
+  var game_board = document.getElementById("game-board");
+  new TetrisGame(game_board, {
+    cols:        14,
+    score_board: document.getElementById("score-board"),
+    next_piece:  document.getElementById("next-piece")
+  });
+  game_board.focus();
+}
+  </script>
 </head>
-<body onload="new TetrisGame(document.getElementById('tetris-game')); document.getElementById('tetris-game').focus(); ">
-	<div id="tetris-game" tabindex="0"></div>
+<body onload="start_game();">
+  <div id="tetris-game">
+    <div id="game-board" tabindex="0"></div>
+    <div id="stats-board">
+      <p id="score-board"></p>
+      <div id="next-piece"></div>
+    </div>
+  </div>
 </body>
-</html>
+<html>

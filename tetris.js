@@ -2,6 +2,7 @@ function TetrisGame(container, options={}) {
 	this.container = container;
   this.cols = typeof options.cols  === "undefined" ? 12 : options.cols;
   this.score_board = options.score_board;
+  this.piece_container = options.next_piece;
 
 	var cell_size = (container.clientWidth / this.cols);
 	var num_rows  = Math.floor(container.clientHeight / cell_size);
@@ -23,6 +24,30 @@ function TetrisGame(container, options={}) {
 		this.grid.push(grid_row);
 	}
 
+  if(typeof this.piece_container !== "undefined") {
+    var container = this.piece_container;
+    while(container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    this.ondeck_grid = [];
+    for(var i = 0; i < 6; i++) {
+      var grid_row = [];
+      var dom_row  = document.createElement("div");
+      dom_row.className = "tetris-row";
+      for(var j = 0; j < 5; j++) {
+        var cell = document.createElement("div");
+        cell.style.width      = cell_size + "px";
+        cell.style.paddingTop = cell_size + "px";
+        dom_row.appendChild(cell);
+        grid_row.push(cell);
+        cell.className = "tetris-cell";
+      }
+      container.appendChild(dom_row);
+      this.ondeck_grid.push(grid_row);
+    }
+  }
+
 	this.pieces = {
 		"I" : [[0, 0], [0, 1], [0, 2], [0, 3]],
 		"J" : [[0, 0], [0, 1], [0, 2], [1, 2]],
@@ -36,7 +61,7 @@ function TetrisGame(container, options={}) {
 	this.reset();
 
   var tg = this;
-  container.onkeypress = function(e){
+  this.container.onkeypress = function(e){
     e = e || window.event;
     tg.keypress(e);
   }
@@ -60,7 +85,10 @@ TetrisGame.prototype.reset = function() {
   for(var i = 0; i < this.grid.length; i++)
 		for(var j = 0; j < this.grid[i].length; j++)
 			this.grid[i][j].className = "tetris-cell";
+  
 
+
+  this.ondeck = undefined;
   this.next_piece();
 }
 
@@ -73,6 +101,21 @@ TetrisGame.prototype.next_piece = function() {
     this.piece  = this.ondeck;
     this.ondeck = this.get_piece();
   }
+
+  if(typeof this.piece_container !== "undefined") {
+    for(var i = 0; i < this.ondeck_grid.length; i++) {
+      for(var j = 0; j < this.ondeck_grid[i].length; j++) {
+        this.ondeck_grid[i][j].className = "tetris-cell";
+      }
+    }
+
+    var grid  = this.ondeck_grid;
+    var piece = this.ondeck;
+    this.ondeck.shape.forEach(function(e){
+      grid[e[0] + 1][e[1] + 1].className = "tetris-cell tetris-"+piece.type;
+    });
+  }
+
   this.check_end_game();
 }
 

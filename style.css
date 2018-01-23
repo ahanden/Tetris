@@ -1,10 +1,24 @@
 #tetris-game {
+  font-family: Arial;
+  font-size: 0px;
 	height: 640px;
+  width: 700px;
+  margin: 20px auto;
+}
+#game-board {
 	width: 480px;
-	border: 1px solid black;
-	margin: 20px auto;
+  height: 100%;
+  display: inline-block;
+}
+#stats-board {
+  border: 1px solid black;
+  width: 200px;
+  float: right;
+  font-size: 14px;
+  vertical-align: text-top;
 }
 
+/* Game styles */
 .tetris-row {
 	font-size: 0px;
 	text-align: center;
@@ -14,6 +28,7 @@
 	background-color: black;
 }
 
+/* Individual piece styles */
 .tetris-cell.tetris-I {
 	background-color: red;
 }
