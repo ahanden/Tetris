@@ -1,7 +1,9 @@
 function TetrisGame(container, options={}) {
 	this.container = container;
+  this.cols = typeof options.cols  === "undefined" ? 12 : options.cols;
+  this.score_board = options.score_board;
 
-	var cell_size = (container.clientWidth / 12);
+	var cell_size = (container.clientWidth / this.cols);
 	var num_rows  = Math.floor(container.clientHeight / cell_size);
 
 	this.grid = [];
@@ -9,7 +11,7 @@ function TetrisGame(container, options={}) {
 		var grid_row = [];
 		var dom_row = document.createElement("div");
 		dom_row.className = "tetris-row";
-		for(var j = 0; j < 12; j++) {
+		for(var j = 0; j < this.cols; j++) {
 			var cell = document.createElement("div");
 			cell.style.width      = cell_size + "px";
 			cell.style.paddingTop = cell_size + "px";
@@ -33,11 +35,7 @@ function TetrisGame(container, options={}) {
 
 	this.reset();
 
-	var tg = this;
-	this.game = setInterval(function() {
-		tg.next_frame();
-	}, 1000);
-
+  var tg = this;
   container.onkeypress = function(e){
     e = e || window.event;
     tg.keypress(e);
@@ -46,13 +44,36 @@ function TetrisGame(container, options={}) {
 
 TetrisGame.prototype.reset = function() {
 	this.score = 0;
-	this.level = 1;
-	for(var i = 0; i < this.grid.length; i++)
+  
+  if(typeof this.game !== "undefined")
+    clearInterval(this.game);
+
+	var tg = this;
+	this.game = setInterval(function() {
+		tg.next_frame();
+	}, 1000);
+
+  if(typeof this.score_board !== "undefined") {
+    this.score_board.innerHTML = "Score: 0";
+  }
+	
+  for(var i = 0; i < this.grid.length; i++)
 		for(var j = 0; j < this.grid[i].length; j++)
 			this.grid[i][j].className = "tetris-cell";
 
-	this.ondeck = this.get_piece();
-	this.piece = this.get_piece();
+  this.next_piece();
+}
+
+TetrisGame.prototype.next_piece = function() {
+  if(typeof this.ondeck == "undefined") {
+    this.ondeck = this.get_piece();
+    this.piece  = this.get_piece();
+  }
+  else {
+    this.piece  = this.ondeck;
+    this.ondeck = this.get_piece();
+  }
+  this.check_end_game();
 }
 
 TetrisGame.prototype.get_piece = function() {
@@ -60,7 +81,7 @@ TetrisGame.prototype.get_piece = function() {
 	var keys = Object.keys(this.pieces);
 	var type = keys[keys.length * Math.random() << 0];
 	return {
-		x         : 5,
+		x         : Math.floor(tg.cols / 2),
 		y         : 1,
 		type      : type,
 		shape     : tg.pieces[type],
@@ -85,7 +106,7 @@ TetrisGame.prototype.get_piece = function() {
       for(var i = 0; i < this.shape.length; i++) {
         var x = -this.shape[i][0] + this.x,
             y =  this.shape[i][1] + this.y;
-        if(x < 0 || x >= 12 || y < 0 || y >= tg.grid.length ||
+        if(x < 0 || x >= this.tg.cols || y < 0 || y >= tg.grid.length ||
             tg.grid[y][x].className != "tetris-cell") {
           legal = false;
           break;
@@ -127,7 +148,7 @@ TetrisGame.prototype.get_piece = function() {
           y += distance;
 
         if(x < 0 ||
-            x >= 12 ||
+            x >= this.tg.cols ||
             y < 0 ||
             y >= tg.grid.length ||
             tg.grid[y][x].className != "tetris-cell") {
@@ -157,9 +178,8 @@ TetrisGame.prototype.get_piece = function() {
 
 TetrisGame.prototype.next_frame = function() {
 	if(! this.piece.move()) {
-		this.piece = this.ondeck;
-		this.ondeck = this.get_piece();
-    this.checkscore();
+    this.next_piece();
+    this.check_score();
 	}
 }
 
@@ -184,21 +204,37 @@ TetrisGame.prototype.keypress = function(e) {
       typeof distance != "undefined") {
     move = this.piece.move(axis, distance);
     if(axis == "y" && ! move) {
-      this.piece  = this.ondeck;
-      this.ondeck = this.get_piece();
-      this.checkscore();
+      this.next_piece();
+      this.check_score();
     }
   }
 }
 
-TetrisGame.prototype.checkscore = function() {
+TetrisGame.prototype.check_end_game = function() {
+  var lost = false;
+  for(var i = 0; i < this.piece.shape.length && !lost; i++) {
+    var x = this.piece.shape[i][1] + this.piece.x,
+        y = this.piece.shape[i][0] + this.piece.y;
+
+    lost = this.grid[y][x].className != "tetris-cell"
+  }
+
+  if(lost) {
+    this.reset();
+  }
+}
+
+TetrisGame.prototype.check_score = function() {
   var tg = this;
+
   tg.piece.shape.forEach(function(e) {
     var x = e[1] + tg.piece.x,
         y = e[0] + tg.piece.y;
 
     tg.grid[y][x].className = "tetris-cell";
   });
+
+  var scored_rows = 0;
 
   for(var y = 0; y < tg.grid.length; y++) {
     var full = true;
@@ -207,7 +243,7 @@ TetrisGame.prototype.checkscore = function() {
     }
 
     if(full) {
-      this.score += 100;
+      scored_rows += scored_rows + 1;
       for(var y1 = y; y1 > 0; y1--)
         for(var x  = 0; x < tg.grid[y1].length; x++)
           tg.grid[y1][x].className = tg.grid[y1 - 1][x].className;
@@ -220,5 +256,17 @@ TetrisGame.prototype.checkscore = function() {
 
     tg.grid[y][x].className = "tetris-cell tetris-"+tg.piece.type;
   });
+  
+  this.score += scored_rows * 100;
 
+  if(scored_rows > 0 && typeof this.score_board !== "undefined") {
+    this.score_board.innerHTML = "Score: "+this.score;
+  }
+
+  clearInterval(this.game);
+
+	var tg = this;
+	this.game = setInterval(function() {
+		tg.next_frame();
+	}, Math.exp(-this.score/5000) * 1000);
 }
