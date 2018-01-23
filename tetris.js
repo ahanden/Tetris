@@ -32,11 +32,11 @@ function TetrisGame(container, options={}) {
   this.score_board = options.score_board;
   this.piece_container = options.next_piece;
 
-	// Compute the size of the grid cells and the number of rows.
+  // Compute the size of the grid cells and the number of rows.
   var cell_size = (container.clientWidth / this.cols);
   var num_rows  = Math.floor(container.clientHeight / cell_size);
 
-	// Fill the ame grid
+  // Fill the ame grid
   this.grid = [];
   for(var i = 0; i < num_rows; i++) {
     var grid_row = [];
@@ -54,7 +54,7 @@ function TetrisGame(container, options={}) {
     this.grid.push(grid_row);
   }
 
-	// If options.next_piece was given, setup the region for the ondefck piece.
+  // If options.next_piece was given, setup the region for the ondefck piece.
   if(typeof this.piece_container !== "undefined") {
     var container = this.piece_container;
     while(container.firstChild) {
@@ -79,7 +79,7 @@ function TetrisGame(container, options={}) {
     }
   }
 
-	// Define the piecce shapes and names.
+  // Define the piecce shapes and names.
   this.pieces = {
     "I" : [[0, 0], [0, 1], [0, 2], [0, 3]],
     "J" : [[0, 0], [0, 1], [0, 2], [1, 2]],
@@ -90,14 +90,14 @@ function TetrisGame(container, options={}) {
     "Z" : [[0, 0], [0, 1], [1, 1], [1, 2]]
   }
 
-	// Setup the event listener for keyboard input.
+  // Setup the event listener for keyboard input.
   var tg = this;
   this.container.onkeypress = function(e){
     e = e || window.event;
     tg.keypress(e);
   }
 
-	// Start the game.
+  // Start the game.
   this.reset();
 
 }
@@ -106,27 +106,27 @@ function TetrisGame(container, options={}) {
  * Resets/restarts the game.
  */
 TetrisGame.prototype.reset = function() {
-	// Stop the game (if it's running)
+  // Stop the game (if it's running)
   if(typeof this.game !== "undefined")
     clearInterval(this.game);
 
-	// Reset the score board
+  // Reset the score board
   this.score = 0;
   if(typeof this.score_board !== "undefined") {
     this.score_board.innerHTML = "Score: 0";
   }
   
-	// Clear the ame board
+  // Clear the ame board
   for(var i = 0; i < this.grid.length; i++)
     for(var j = 0; j < this.grid[i].length; j++)
       this.grid[i][j].className = "tetris-cell";
   
-	// Refill the piece quee
+  // Refill the piece quee
   this.ondeck = undefined;
   this.next_piece();
 
-	// Restart the game
-	var tg = this;
+  // Restart the game
+  var tg = this;
   this.game = setInterval(function() {
     tg.next_frame();
   }, 1000);
@@ -136,18 +136,18 @@ TetrisGame.prototype.reset = function() {
  * Refills the piece queue.
  */
 TetrisGame.prototype.next_piece = function() {
-	// If there is no on-deck piece, fill both pieces.
+  // If there is no on-deck piece, fill both pieces.
   if(typeof this.ondeck == "undefined") {
     this.ondeck = this.get_piece();
     this.piece  = this.get_piece();
   }
-	// Otherwise, move down the queue.
+  // Otherwise, move down the queue.
   else {
     this.piece  = this.ondeck;
     this.ondeck = this.get_piece();
   }
 
-	// Update on-deck display area, if defined.
+  // Update on-deck display area, if defined.
   if(typeof this.piece_container !== "undefined") {
     for(var i = 0; i < this.ondeck_grid.length; i++) {
       for(var j = 0; j < this.ondeck_grid[i].length; j++) {
@@ -162,7 +162,7 @@ TetrisGame.prototype.next_piece = function() {
     });
   }
 
-	// Check to see if the game has ended.
+  // Check to see if the game has ended.
   this.check_end_game();
 }
 
@@ -180,25 +180,25 @@ TetrisGame.prototype.get_piece = function() {
     shape     : tg.pieces[type],         // Coordinates to define its shape.
     tg        : tg,                      // The parent game, for reference.
     is_moving : false,                   // Whether the piece is currently
-		                                     // moving.
+                                         // moving.
     rotate    : function() {             // Rotate's the piece 90 degrees.
-			// All moving/rotating methods must wait their turn.
+      // All moving/rotating methods must wait their turn.
       while(this.is_moving){}
 
-			// Block other moving/rotating methods.
+      // Block other moving/rotating methods.
       this.is_moving = true;
 
       var piece = this;
       var tg    = this.tg;
 
-			// Clear the piece from the board.
+      // Clear the piece from the board.
       this.shape.forEach(function(e) {
         var x = piece.x + e[1],
             y = piece.y + e[0];
         tg.grid[y][x].className = "tetris-cell";
       });
 
-			// Attempt to rotate  the piece.
+      // Attempt to rotate  the piece.
       var new_shape = [];
       var legal = true;
       for(var i = 0; i < this.shape.length; i++) {
@@ -212,38 +212,38 @@ TetrisGame.prototype.get_piece = function() {
         new_shape.push([this.shape[i][1], -this.shape[i][0]]);
       }
 
-			// If the rotation worked, update the shape.
+      // If the rotation worked, update the shape.
       if(legal)
         this.shape = new_shape;
 
-			// Redraw the piece.
+      // Redraw the piece.
       this.shape.forEach(function(e) {
         var x = piece.x + e[1],
             y = piece.y + e[0];
         tg.grid[y][x].className = "tetris-cell tetris-" + piece.type;
       });
 
-			// Release movement.
+      // Release movement.
       this.is_moving = false;
     },
     move      : function(axis="y", distance=1) { // Move the piece
       var piece = this;
       var tg    = this.tg;
 
-			// Wait until other methods are done moving this piece.
+      // Wait until other methods are done moving this piece.
       while(this.is_moving){}
 
-			// Block other methods.
+      // Block other methods.
       is_moving = true;
 
-			// Clear this piece from the board.
+      // Clear this piece from the board.
       this.shape.forEach(function(e) {
         var x = piece.x + e[1],
             y = piece.y + e[0];
         tg.grid[y][x].className = "tetris-cell";
       });
       
-			// Attempt the move.
+      // Attempt the move.
       for(var i = 0; i < this.shape.length; i++) {
         var x = this.x + this.shape[i][1],
             y = this.y + this.shape[i][0];
@@ -262,23 +262,23 @@ TetrisGame.prototype.get_piece = function() {
         }
       }
 
-			// Execute the move.
+      // Execute the move.
       if(axis == "x")
         this.x += distance;
       else if(axis == "y")
         this.y += distance;
 
-			// Redraw the piece.
+      // Redraw the piece.
       this.shape.forEach(function(e) {
         var x = piece.x + e[1],
             y = piece.y + e[0];
         tg.grid[y][x].className = "tetris-cell tetris-" + piece.type;
       });
 
-			// Release the movement.
+      // Release the movement.
       is_moving = false;
 
-			// Return whether the piece moved.
+      // Return whether the piece moved.
       return distance;
 
     }
@@ -336,8 +336,8 @@ TetrisGame.prototype.keypress = function(e) {
  */
 TetrisGame.prototype.check_end_game = function() {
   var lost = false;
-	
-	// See if the new piece would overlap an existing piece.
+  
+  // See if the new piece would overlap an existing piece.
   for(var i = 0; i < this.piece.shape.length && !lost; i++) {
     var x = this.piece.shape[i][1] + this.piece.x,
         y = this.piece.shape[i][0] + this.piece.y;
@@ -345,7 +345,7 @@ TetrisGame.prototype.check_end_game = function() {
     lost = this.grid[y][x].className != "tetris-cell"
   }
 
-	// If so, restart.
+  // If so, restart.
   if(lost) {
     this.reset();
   }
@@ -357,7 +357,7 @@ TetrisGame.prototype.check_end_game = function() {
 TetrisGame.prototype.check_score = function() {
   var tg = this;
 
-	// Erase the current moving piece.
+  // Erase the current moving piece.
   tg.piece.shape.forEach(function(e) {
     var x = e[1] + tg.piece.x,
         y = e[0] + tg.piece.y;
@@ -367,14 +367,14 @@ TetrisGame.prototype.check_score = function() {
 
   var scored_rows = 0;
 
-	// Go through each row an see if it scores.
+  // Go through each row an see if it scores.
   for(var y = 0; y < tg.grid.length; y++) {
     var full = true;
     for(var x = 0; x < tg.grid[y].length && full; x++) {
       full = tg.grid[y][x].className != "tetris-cell";
     }
 
-		// If the row scores, shift all above rows down one.
+    // If the row scores, shift all above rows down one.
     if(full) {
       scored_rows += scored_rows + 1;
       for(var y1 = y; y1 > 0; y1--)
@@ -383,7 +383,7 @@ TetrisGame.prototype.check_score = function() {
     }
   }
 
-	// Redraw the moving piece.
+  // Redraw the moving piece.
   tg.piece.shape.forEach(function(e) {
     var x = e[1] + tg.piece.x,
         y = e[0] + tg.piece.y;
@@ -391,19 +391,19 @@ TetrisGame.prototype.check_score = function() {
     tg.grid[y][x].className = "tetris-cell tetris-"+tg.piece.type;
   });
   
-	// Compute the score.
+  // Compute the score.
   this.score += scored_rows * 100;
 
-	if(scored_rows > 0) {
-		// Update the score board.
-		if(typeof this.score_board !== "undefined")
-			this.score_board.innerHTML = "Score: "+this.score;
+  if(scored_rows > 0) {
+    // Update the score board.
+    if(typeof this.score_board !== "undefined")
+      this.score_board.innerHTML = "Score: "+this.score;
 
-		// Increase the game speed.
-		clearInterval(this.game);
+    // Increase the game speed.
+    clearInterval(this.game);
 
-		this.game = setInterval(function() {
-			tg.next_frame();
-		}, Math.exp(-this.score/5000) * 1000);
-	}
+    this.game = setInterval(function() {
+      tg.next_frame();
+    }, Math.exp(-this.score/5000) * 1000);
+  }
 }
