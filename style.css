@@ -1,34 +1,18 @@
-#tetris-game {
-  font-family: Arial;
-  font-size: 0px;
-	height: 640px;
-  width: 700px;
-  margin: 20px auto;
-}
-#game-board {
-	width: 480px;
-  height: 100%;
-  display: inline-block;
-}
-#stats-board {
-  border: 1px solid black;
-  width: 200px;
-  float: right;
-  font-size: 14px;
-  vertical-align: text-top;
-}
+/*---------------------------------------------------------------------------*\
+    Custom styles.
+      Feel free to moify the following styles to make this game appear as
+      you would like.
 
-/* Game styles */
-.tetris-row {
-	font-size: 0px;
-	text-align: center;
-}
+      Note: The JavaScript will automatically set the width and height of the
+      game's elements. Width and and paddng elements will be over-written by
+      the javascript, and adding borders may effect rending if not using
+      border-box sizng.
+\*---------------------------------------------------------------------------*/
+
+
 .tetris-cell {
-	display: inline-block;
 	background-color: black;
 }
-
-/* Individual piece styles */
 .tetris-cell.tetris-I {
 	background-color: red;
 }
@@ -49,4 +33,17 @@
 }
 .tetris-cell.tetris-T {
 	background-color: teal;
+}
+
+/*---------------------------------------------------------------------------*\
+    Required Styles
+      These styles are necessary for proper rendering of the tetris game. You
+      probably shouldn't change them.
+\*---------------------------------------------------------------------------*/
+.tetris-row {
+	font-size: 0px;
+	text-align: center;
+}
+.tetris-cell {
+	display: inline-block;
 }
