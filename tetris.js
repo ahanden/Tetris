@@ -87,7 +87,6 @@ TetrisGame.prototype.get_piece = function() {
             y =  this.shape[i][1] + this.y;
         if(x < 0 || x >= 12 || y < 0 || y >= tg.grid.length ||
             tg.grid[y][x].className != "tetris-cell") {
-          console.log("CHECK");
           legal = false;
           break;
         }
@@ -160,6 +159,7 @@ TetrisGame.prototype.next_frame = function() {
 	if(! this.piece.move()) {
 		this.piece = this.ondeck;
 		this.ondeck = this.get_piece();
+    this.checkscore();
 	}
 }
 
@@ -186,9 +186,39 @@ TetrisGame.prototype.keypress = function(e) {
     if(axis == "y" && ! move) {
       this.piece  = this.ondeck;
       this.ondeck = this.get_piece();
+      this.checkscore();
     }
   }
 }
 
-TetrisGame.prototype.score = function() {
+TetrisGame.prototype.checkscore = function() {
+  var tg = this;
+  tg.piece.shape.forEach(function(e) {
+    var x = e[1] + tg.piece.x,
+        y = e[0] + tg.piece.y;
+
+    tg.grid[y][x].className = "tetris-cell";
+  });
+
+  for(var y = 0; y < tg.grid.length; y++) {
+    var full = true;
+    for(var x = 0; x < tg.grid[y].length && full; x++) {
+      full = tg.grid[y][x].className != "tetris-cell";
+    }
+
+    if(full) {
+      this.score += 100;
+      for(var y1 = y; y1 > 0; y1--)
+        for(var x  = 0; x < tg.grid[y1].length; x++)
+          tg.grid[y1][x].className = tg.grid[y1 - 1][x].className;
+    }
+  }
+
+  tg.piece.shape.forEach(function(e) {
+    var x = e[1] + tg.piece.x,
+        y = e[0] + tg.piece.y;
+
+    tg.grid[y][x].className = "tetris-cell tetris-"+tg.piece.type;
+  });
+
 }
